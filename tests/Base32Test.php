@@ -36,6 +36,15 @@ class Base32Test extends TestCase
         $enc = $base32->encode('abc 1234', false);
         $this->assertEquals('MFRGGIBRGIZTI', $enc);
 
+        $enc = $base32->encode('123456789101112131415');
+        $this->assertEquals('GEZDGNBVGY3TQOJRGAYTCMJSGEZTCNBRGU======', $enc);
+
+        $enc = $base32->encode('12345678910111213');
+        $this->assertEquals('GEZDGNBVGY3TQOJRGAYTCMJSGEZQ====', $enc);
+
+        $enc = $base32->encode('12345678910111213141516171819');
+        $this->assertEquals('GEZDGNBVGY3TQOJRGAYTCMJSGEZTCNBRGUYTMMJXGE4DCOI=', $enc);
+
         $enc = $base32->encode("\0€ÿ", false);
         $this->assertEquals('ADRIFLGDX4', $enc);
     }
@@ -62,5 +71,20 @@ class Base32Test extends TestCase
 
         $dec = $base32->decode('mfrggibrgizti');
         $this->assertEquals("abc 1234", $dec);
+    }
+
+    /**
+     * Test.
+     *
+     * @covers ::decode
+     */
+    public function testDecodeWithInvalidEncodedString()
+    {
+        $base32 = new Base32();
+        $dec = $base32->decode('XXXXXXX=======');
+        $this->assertFalse($dec);
+
+        $dec = $base32->decode('======');
+        $this->assertFalse($dec);
     }
 }
