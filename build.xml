@@ -1,130 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="christianriesen-base32" default="build">
- <target name="build" depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpunit,phpcb"/>
+<project name="phinx-migrations" default="phpunit">
+    
+    <target name="noop"/>
+    <property environment="env"/>
+    
+    <condition property="is_windows">
+        <os family="windows"/>
+    </condition>
+    
+    <tstamp>
+        <format property="now" pattern="yyyy-MM-dd HH:mm:ss" locale="en,UK"/>
+        <format property="now_num" pattern="yyyyMMddHHmmss" locale="en,UK"/>
+        <format property="now_file" pattern="yyyy-MM-dd_HHmmss" locale="en,UK"/>
+    </tstamp>
+    
+    <!-- By default, we assume all tools to be on the $PATH -->
+    <condition property="ext" value=".bat">
+        <os family="windows"/>
+    </condition>
 
- <target name="build-parallel" depends="prepare,lint,tools-parallel,phpunit,phpcb"/>
-
- <target name="tools-parallel" description="Run tools in parallel">
-  <parallel threadCount="2">
-   <sequential>
-    <antcall target="pdepend"/>
-    <antcall target="phpmd-ci"/>
-   </sequential>
-   <antcall target="phpcpd"/>
-   <antcall target="phpcs-ci"/>
-   <antcall target="phploc"/>
-  </parallel>
- </target>
-
- <target name="clean" description="Cleanup build artifacts">
-  <delete dir="${basedir}/build/code-browser"/>
-  <delete dir="${basedir}/build/coverage"/>
-  <delete dir="${basedir}/build/logs"/>
-  <delete dir="${basedir}/build/pdepend"/>
-  <exec executable="bash">
-   <arg value="-c" />
-   <arg value="curl -s http://getcomposer.org/installer | php" />
-  </exec>
-  <exec executable="php">
-   <arg value="composer.phar" />
-   <arg value="install" />
-  </exec>
- </target>
-
- <target name="prepare" depends="clean" description="Prepare for build">
-  <mkdir dir="${basedir}/build/code-browser"/>
-  <mkdir dir="${basedir}/build/coverage"/>
-  <mkdir dir="${basedir}/build/logs"/>
-  <mkdir dir="${basedir}/build/pdepend"/>
- </target>
-
- <target name="lint" description="Perform syntax check of sourcecode files">
-  <apply executable="php" failonerror="true">
-   <arg value="-l"/>
-
-   <fileset dir="${basedir}/src">
-    <include name="**/*.php"/>
-    <modified/>
-   </fileset>
-
-   <fileset dir="${basedir}/tests">
-    <include name="**/*.php"/>
-    <modified/>
-   </fileset>
-  </apply>
- </target>
-
- <target name="phploc" description="Measure project size using PHPLOC">
-  <exec executable="phploc">
-   <arg value="--log-csv"/>
-   <arg value="${basedir}/build/logs/phploc.csv"/>
-   <arg path="${basedir}/src"/>
-  </exec>
- </target>
-
- <target name="pdepend" description="Calculate software metrics using PHP_Depend">
-  <exec executable="pdepend">
-   <arg value="--jdepend-xml=${basedir}/build/logs/jdepend.xml"/>
-   <arg value="--jdepend-chart=${basedir}/build/pdepend/dependencies.svg"/>
-   <arg value="--overview-pyramid=${basedir}/build/pdepend/overview-pyramid.svg"/>
-   <arg path="${basedir}/src"/>
-  </exec>
- </target>
-
- <target name="phpmd" description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
-  <exec executable="phpmd">
-   <arg path="${basedir}/src"/>
-   <arg value="text"/>
-   <arg value="${basedir}/build/phpmd.xml"/>
-  </exec>
- </target>
-
- <target name="phpmd-ci" description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
-  <exec executable="phpmd">
-   <arg path="${basedir}/src"/>
-   <arg value="xml"/>
-   <arg value="${basedir}/build/phpmd.xml"/>
-   <arg value="--reportfile"/>
-   <arg value="${basedir}/build/logs/pmd.xml"/>
-  </exec>
- </target>
-
- <target name="phpcs" description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
-  <exec executable="phpcs">
-   <arg value="--standard=${basedir}/build/phpcs.xml"/>
-   <arg path="${basedir}/src"/>
-  </exec>
- </target>
-
- <target name="phpcs-ci" description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
-  <exec executable="phpcs" output="/dev/null">
-   <arg value="--report=checkstyle"/>
-   <arg value="--report-file=${basedir}/build/logs/checkstyle.xml"/>
-   <arg value="--standard=${basedir}/build/phpcs.xml"/>
-   <arg path="${basedir}/src"/>
-  </exec>
- </target>
-
- <target name="phpcpd" description="Find duplicate code using PHPCPD">
-  <exec executable="phpcpd">
-   <arg value="--log-pmd"/>
-   <arg value="${basedir}/build/logs/pmd-cpd.xml"/>
-   <arg path="${basedir}/src"/>
-  </exec>
- </target>
-
- <target name="phpunit" description="Run unit tests with PHPUnit">
-  <exec executable="phpunit" failonerror="true"/>
- </target>
-
- <target name="phpcb" description="Aggregate tool output with PHP_CodeBrowser">
-  <exec executable="phpcb">
-   <arg value="--log"/>
-   <arg path="${basedir}/build/logs"/>
-   <arg value="--source"/>
-   <arg path="${basedir}/src"/>
-   <arg value="--output"/>
-   <arg path="${basedir}/build/code-browser"/>
-  </exec>
- </target>
+    <!-- DISPLAYS WINDOWS OS -->
+    <target name="display_windows" if="is_windows" >
+        <echo message="OS Family is: Windows" />
+    </target>
+    
+    <condition property="is_windows">
+        <os family="windows"/>
+    </condition>
+    <condition property="is_linux">
+        <os family="unix" />
+    </condition>
+     
+    <target name="phpunit" description="Run unit tests with PHPUnit">
+        <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit">
+            <arg value="--configuration"/>
+            <arg path="${basedir}/phpunit.xml"/>
+        </exec>
+    </target>
+    
+    <target name="phpunit-coverage" description="Run unit tests with PHPUnit with coverage">
+        <delete dir="${basedir}/build/coverage"/>
+        <mkdir dir="${basedir}/build/coverage"/>
+        <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit-coverage">
+            <arg value="--configuration"/>
+            <arg path="${basedir}/phpunit.xml"/>
+            <arg value="--coverage-clover"/>
+            <arg path="${basedir}/build/logs/clover.xml"/>
+            <arg value="--coverage-html"/>
+            <arg path="${basedir}/build/coverage"/>
+        </exec>
+    </target>
+    
+    <target name="php-cs-fixer" description="Code style fixer">
+        <mkdir dir="${basedir}/build"/>
+        <get src="https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.0.0/php-cs-fixer.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <exec executable="php" searchpath="true" resolveexecutable="true">
+            <arg value="${basedir}/build/php-cs-fixer.phar"/>
+            <arg value="fix"/>
+            <arg value="${basedir}/src/"/>
+            <arg value="--rules=@PSR2"/>
+            <arg value="--using-cache=no"/>
+        </exec>   
+        <exec executable="php" searchpath="true" resolveexecutable="true">
+            <arg value="${basedir}/build/php-cs-fixer.phar"/>
+            <arg value="fix"/>
+            <arg value="${basedir}/tests/"/>
+            <arg value="--rules=@PSR2"/>
+            <arg value="--using-cache=no"/>
+        </exec>   
+    </target>
+    
 </project>

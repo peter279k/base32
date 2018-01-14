@@ -1,39 +1,47 @@
 {
-    "name": "christian-riesen/base32",
-    "type": "library",
-    "description": "Base32 encoder/decoder according to RFC 4648",
-    "keywords": ["base32","encode","decode","rfc4648"],
-    "homepage": "https://github.com/ChristianRiesen/base32",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Christian Riesen",
-            "email": "chris.riesen@gmail.com",
-            "homepage": "http://christianriesen.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": ">=5.3"
-    },
-    "require-dev": {
-        "php": ">=5.6",
-        "phpunit/phpunit": "^5.0",
-        "satooshi/php-coveralls": "^1.0"
-    },
-   "autoload": {
-        "psr-4": {
-            "Base32\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Base32\\": "tests/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.1.x-dev"
-        }
+  "name": "odan/base32",
+  "type": "library",
+  "description": "Base32 based on RFC 4648",
+  "keywords": [
+    "base32",
+    "encode",
+    "decode",
+    "encoding",
+    "encoder"
+  ],
+  "homepage": "https://github.com/odan/base32",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "odan",
+      "email": "odan@users.noreply.github.com",
+      "homepage": "https://github.com/odan/session",
+      "role": "Developer"
     }
+  ],
+  "require": {
+    "php": ">=7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-clover build/logs/clover.xml --coverage-html build/coverage",
+    "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit -n --no-patch 1 src tests"
+  },
+  "autoload": {
+    "psr-4": {
+      "Odan\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Odan\\Test\\": "tests"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
 }
